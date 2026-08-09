@@ -11,6 +11,7 @@ class Vexa:
     def start(self):
         print(f"{self.name} V{self.version} is online.")
         print("Systems initialized.")
+        print(f"API key configured: {settings.API_KEY_CONFIGURED}")
 
     def process(self, message):
         return self.brain.think(message)

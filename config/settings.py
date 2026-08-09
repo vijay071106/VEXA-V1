@@ -9,6 +9,7 @@ class Settings:
     APP_VERSION = "1.0.0"
 
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    API_KEY_CONFIGURED = bool(OPENAI_API_KEY)
 
 
 settings = Settings()
