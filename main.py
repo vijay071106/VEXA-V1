@@ -1,6 +1,9 @@
+from core.vexa import Vexa
+
+
 def main():
-    print("VEXA is online.")
-    print("Hello! I am VEXA, your personal AI assistant.")
+    vexa = Vexa()
+    vexa.start()
 
 
 if __name__ == "__main__":
