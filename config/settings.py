@@ -1,15 +1,9 @@
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-
 class Settings:
     APP_NAME = "VEXA"
     APP_VERSION = "1.0.0"
+    LOCAL_MODEL = "qwen3:4b"
 
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-    API_KEY_CONFIGURED = bool(OPENAI_API_KEY)
+    
 
 
 settings = Settings()
