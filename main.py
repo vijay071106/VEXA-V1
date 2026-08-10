@@ -3,14 +3,22 @@ from core.vexa import Vexa
 
 def main():
     vexa = Vexa()
-
     vexa.start()
 
-    response1 = vexa.process("My name is V.")
-    print("VEXA:", response1)
+    print("Type 'exit' to stop VEXA.")
 
-    response2 = vexa.process("What is my name?")
-    print("VEXA:", response2)
+    while True:
+        user_input = input("You: ").strip()
+
+        if user_input.lower() == "exit":
+            print("VEXA shutting down.")
+            break
+
+        if not user_input:
+            continue
+
+        response = vexa.process(user_input)
+        print(f"VEXA: {response}")
 
 
 if __name__ == "__main__":
