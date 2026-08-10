@@ -7,8 +7,14 @@ class VexaBrain:
     def __init__(self):
         self.name = "VEXA Brain"
         self.model = settings.LOCAL_MODEL
+        self.history = []
 
     def think(self, message):
+        self.history.append({
+            "role": "user",
+            "content": message,
+        })
+
         response = ollama.chat(
             model=self.model,
             messages=[
@@ -20,11 +26,15 @@ class VexaBrain:
                         "another language. Be concise, helpful, and natural."
                     ),
                 },
-                {
-                    "role": "user",
-                    "content": message,
-                },
+                *self.history,
             ],
         )
 
-        return response["message"]["content"]
+        reply = response["message"]["content"]
+
+        self.history.append({
+            "role": "assistant",
+            "content": reply,
+        })
+
+        return reply
