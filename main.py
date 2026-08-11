@@ -1,3 +1,5 @@
+from urllib import response
+
 from core.vexa import Vexa
 
 
@@ -18,8 +20,9 @@ def main():
             continue
 
         response = vexa.process(user_input)
-        print(f"VEXA: {response}")
 
+        if not response:
+            print()
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,7 @@
 import ollama
 
 from config.settings import settings
+from tools.registry import ToolRegistry
 
 
 class VexaBrain:
@@ -8,8 +9,67 @@ class VexaBrain:
         self.name = "VEXA Brain"
         self.model = settings.LOCAL_MODEL
         self.history = []
+        self.tool_registry = ToolRegistry()
+
+    def use_tool(self, name, argument):
+        return self.tool_registry.execute(name, argument)
+
+    def decide_tool(self, message):
+        response = ollama.chat(
+            model=self.model,
+            format="json",
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are VEXA's tool decision system. "
+                        "Available tool: calculator. "
+                        "If the user needs arithmetic, return JSON with "
+                        "'action' set to 'calculator' and 'argument' containing "
+                        "the arithmetic expression. "
+                        "Otherwise return JSON with 'action' set to 'answer' "
+                        "and 'argument' set to an empty string. "
+                        "Return JSON only."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": message,
+                },
+            ],
+        )
+
+        return response["message"]["content"]
+
+    def is_calculation(self, message):
+        allowed = "0123456789+-*/().% "
+
+        cleaned = (
+            message.lower()
+            .replace("what is", "")
+            .replace("calculate", "")
+            .replace("?", "")
+            .strip()
+        )
+
+        return bool(cleaned) and all(
+            char in allowed for char in cleaned
+        )
 
     def think(self, message):
+        if self.is_calculation(message):
+            expression = (
+                message.lower()
+                .replace("what is", "")
+                .replace("calculate", "")
+                .replace("?", "")
+                .strip()
+            )
+
+            result = self.use_tool("calculator", expression)
+            print(f"VEXA: {result}")
+            return result
+
         self.history.append({
             "role": "user",
             "content": message,
@@ -28,9 +88,16 @@ class VexaBrain:
                 },
                 *self.history,
             ],
+            stream=True,
         )
+        reply = ""
 
-        reply = response["message"]["content"]
+        for chunk in response:
+            text = chunk["message"]["content"]
+            print(text, end="", flush=True)
+            reply += text
+
+        print()
 
         self.history.append({
             "role": "assistant",
