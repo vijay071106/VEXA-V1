@@ -24,16 +24,20 @@ class WebSearchTool:
             results = []
 
             if data.get("AbstractText"):
-                results.append(data["AbstractText"])
+                results.append(
+                    f"Summary: {data['AbstractText'][:400]}"
+            )
 
-            for topic in data.get("RelatedTopics", [])[:5]:
+            for topic in data.get("RelatedTopics", [])[:3]:
                 if isinstance(topic, dict) and topic.get("Text"):
-                    results.append(topic["Text"])
+                    results.append(
+                        f"- {topic['Text'][:200]}"
+                    )
 
             if not results:
                 return "No useful results found."
 
-            return "\n".join(results)
+            return "\n\n".join(results)
 
         except requests.RequestException:
             return "Web search is currently unavailable."

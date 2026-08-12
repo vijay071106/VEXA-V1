@@ -1,5 +1,6 @@
 from tools.safety import SafetyLayer
 from tools.calculator import CalculatorTool
+from tools.web_search import WebSearchTool
 
 
 class ToolRegistry:
@@ -7,6 +8,10 @@ class ToolRegistry:
         self.tools = {
             "calculator": {
                 "tool": CalculatorTool(),
+                "risk": "safe",
+            },
+            "web_search": {
+                "tool": WebSearchTool(),
                 "risk": "safe",
             },
         }
