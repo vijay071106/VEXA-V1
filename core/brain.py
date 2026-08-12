@@ -56,7 +56,22 @@ class VexaBrain:
             char in allowed for char in cleaned
         )
 
+    def is_web_search(self, message):
+        triggers = [
+            "search for",
+            "search",
+            "look up",
+            "find online",
+            "google",
+            "what happened today",
+            "latest news",
+            "current news",
+        ]
+        message = message.lower().strip()
+        return any(trigger in message for trigger in triggers)
+
     def think(self, message):
+        # Check for simple arithmetic expressions first
         if self.is_calculation(message):
             expression = (
                 message.lower()
@@ -67,9 +82,36 @@ class VexaBrain:
             )
 
             result = self.use_tool("calculator", expression)
-            print(f"VEXA: {result}")
             return result
 
+        # Check if user is asking for a web search
+        def is_web_search(self, message):
+            message = message.lower().strip()
+            triggers = [
+                "search for",
+                "search",
+                "look up",
+                "find online",
+                "google",
+                "what happened today",
+                "latest news",
+                "current news",
+            ]
+            question_starts = [
+                "what ",
+                "where ",
+                "when ",
+                "who ",
+            ]
+            if any(trigger in message for trigger in triggers):
+                return True
+            if any(message.startswith(start) for start in question_starts):
+                return True
+
+            return False
+        return self.use_tool("web_search", query)
+
+        # Fallback: normal conversational response
         self.history.append({
             "role": "user",
             "content": message,
