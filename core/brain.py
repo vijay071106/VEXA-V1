@@ -1,3 +1,5 @@
+from email.mime import message
+
 import ollama
 
 from config.settings import settings
@@ -57,6 +59,7 @@ class VexaBrain:
         )
 
     def is_web_search(self, message):
+        message = message.lower().strip()
         triggers = [
             "search for",
             "search",
@@ -67,8 +70,19 @@ class VexaBrain:
             "latest news",
             "current news",
         ]
-        message = message.lower().strip()
-        return any(trigger in message for trigger in triggers)
+        question_starts = [
+            "what ",
+            "where ",
+            "when ",
+            "who ",
+        ]
+        if any(trigger in message for trigger in triggers):
+            return True
+
+        if any(message.startswith(start) for start in question_starts):
+            return True
+
+        return False
 
     def think(self, message):
         # Check for simple arithmetic expressions first
@@ -84,32 +98,19 @@ class VexaBrain:
             result = self.use_tool("calculator", expression)
             return result
 
-        # Check if user is asking for a web search
-        def is_web_search(self, message):
-            message = message.lower().strip()
-            triggers = [
-                "search for",
-                "search",
-                "look up",
-                "find online",
-                "google",
-                "what happened today",
-                "latest news",
-                "current news",
-            ]
-            question_starts = [
-                "what ",
-                "where ",
-                "when ",
-                "who ",
-            ]
-            if any(trigger in message for trigger in triggers):
-                return True
-            if any(message.startswith(start) for start in question_starts):
-                return True
+            # Check for web search requests
+        if self.is_web_search(message):
+            query = (
+                message.lower()
+                .replace("search for", "")
+                .replace("search", "")
+                .replace("look up", "")
+                .replace("find online", "")
+                .replace("google", "")
+                .strip()
+            )
 
-            return False
-        return self.use_tool("web_search", query)
+            return self.use_tool("web_search", query)
 
         # Fallback: normal conversational response
         self.history.append({
