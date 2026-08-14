@@ -1,5 +1,6 @@
 import requests
 from core.privacy import PrivacyCore
+from core.activity_log import ActivityLog
 
 class WebSearchTool:
     name = "web_search"
@@ -7,10 +8,13 @@ class WebSearchTool:
     
     def __init__(self):
         self.privacy = PrivacyCore()
+        self.activity_log = ActivityLog()
 
     def run(self, query):
         if not self.privacy.check_external_data(query):
+            self.activity_log.record("WEB_SEARCH", "BLOCKED")
             return "I cannot search for that."
+        self.activity_log.record("WEB_SEARCH", "ALLOWED")
 
         try:
             response = requests.get(
