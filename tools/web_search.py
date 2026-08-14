@@ -1,11 +1,17 @@
 import requests
-
+from core.privacy import PrivacyCore
 
 class WebSearchTool:
     name = "web_search"
     description = "Searches the web for information."
+    
+    def __init__(self):
+        self.privacy = PrivacyCore()
 
     def run(self, query):
+        if not self.privacy.check_external_data(query):
+            return "I cannot search for that."
+
         try:
             response = requests.get(
                 "https://api.duckduckgo.com/",
