@@ -24,6 +24,7 @@ def main():
         if response and (
             vexa.brain.is_calculation(user_input)
             or vexa.brain.is_web_search(user_input)
+            or user_input.lower().strip() == "privacy status"
         ):
             print(f"VEXA: {response}")
 

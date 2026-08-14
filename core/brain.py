@@ -4,6 +4,7 @@ import ollama
 
 from config.settings import settings
 from tools.registry import ToolRegistry
+from core.privacy import PrivacyCore
 
 
 class VexaBrain:
@@ -12,6 +13,7 @@ class VexaBrain:
         self.model = settings.LOCAL_MODEL
         self.history = []
         self.tool_registry = ToolRegistry()
+        self.privacy = PrivacyCore()
 
     def use_tool(self, name, argument):
         return self.tool_registry.execute(name, argument)
@@ -60,6 +62,21 @@ class VexaBrain:
 
     def is_web_search(self, message):
         message = message.lower().strip()
+        reasoning_triggers = [
+            "what do you think",
+            "why do you think",
+            "explain why",
+            "explain how",
+            "write",
+            "create",
+            "code",
+            "program",
+            "tell me a story",
+            "brainstorm",
+        ]
+        if any(trigger in message for trigger in reasoning_triggers):
+            return False
+        
         triggers = [
             "search for",
             "search",
@@ -69,6 +86,10 @@ class VexaBrain:
             "what happened today",
             "latest news",
             "current news",
+            "latest",
+            "current",
+            "today",
+            "recent",
         ]
         question_starts = [
             "what ",
@@ -85,6 +106,8 @@ class VexaBrain:
         return False
 
     def think(self, message):
+        if message.lower().strip() == "privacy status":
+            return str(self.privacy.status())
         # Check for simple arithmetic expressions first
         if self.is_calculation(message):
             expression = (

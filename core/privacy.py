@@ -45,3 +45,10 @@ class PrivacyCore:
                 return False
 
         return True
+    
+    def status(self):
+        return {
+            "privacy_core": "ACTIVE",
+            "external_data_check": "ACTIVE",
+            "secret_protection": "ACTIVE",
+        }
