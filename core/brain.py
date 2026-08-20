@@ -1,5 +1,3 @@
-from email.mime import message
-
 import ollama
 
 from config.settings import settings
@@ -8,11 +6,17 @@ from core.privacy import PrivacyCore
 
 
 class VexaBrain:
-    def __init__(self):
+    def __init__(self, kill_switch):
         self.name = "VEXA Brain"
         self.model = settings.LOCAL_MODEL
         self.history = []
-        self.tool_registry = ToolRegistry()
+
+        # Use VEXA's central kill switch
+        self.kill_switch = kill_switch
+
+        # Pass the same kill switch to the tool registry
+        self.tool_registry = ToolRegistry(self.kill_switch)
+
         self.privacy = PrivacyCore()
 
     def use_tool(self, name, argument):
@@ -57,11 +61,13 @@ class VexaBrain:
         )
 
         return bool(cleaned) and all(
-            char in allowed for char in cleaned
+            char in allowed
+            for char in cleaned
         )
 
     def is_web_search(self, message):
         message = message.lower().strip()
+
         reasoning_triggers = [
             "what do you think",
             "why do you think",
@@ -74,9 +80,13 @@ class VexaBrain:
             "tell me a story",
             "brainstorm",
         ]
-        if any(trigger in message for trigger in reasoning_triggers):
+
+        if any(
+            trigger in message
+            for trigger in reasoning_triggers
+        ):
             return False
-        
+
         triggers = [
             "search for",
             "search",
@@ -91,16 +101,24 @@ class VexaBrain:
             "today",
             "recent",
         ]
+
         question_starts = [
             "what ",
             "where ",
             "when ",
             "who ",
         ]
-        if any(trigger in message for trigger in triggers):
+
+        if any(
+            trigger in message
+            for trigger in triggers
+        ):
             return True
 
-        if any(message.startswith(start) for start in question_starts):
+        if any(
+            message.startswith(start)
+            for start in question_starts
+        ):
             return True
 
         return False
@@ -108,6 +126,7 @@ class VexaBrain:
     def think(self, message):
         if message.lower().strip() == "privacy status":
             return str(self.privacy.status())
+
         # Check for simple arithmetic expressions first
         if self.is_calculation(message):
             expression = (
@@ -118,10 +137,14 @@ class VexaBrain:
                 .strip()
             )
 
-            result = self.use_tool("calculator", expression)
+            result = self.use_tool(
+                "calculator",
+                expression,
+            )
+
             return result
 
-            # Check for web search requests
+        # Check for web search requests
         if self.is_web_search(message):
             query = (
                 message.lower()
@@ -133,13 +156,18 @@ class VexaBrain:
                 .strip()
             )
 
-            return self.use_tool("web_search", query)
+            return self.use_tool(
+                "web_search",
+                query,
+            )
 
         # Fallback: normal conversational response
-        self.history.append({
-            "role": "user",
-            "content": message,
-        })
+        self.history.append(
+            {
+                "role": "user",
+                "content": message,
+            }
+        )
 
         response = ollama.chat(
             model=self.model,
@@ -156,6 +184,7 @@ class VexaBrain:
             ],
             stream=True,
         )
+
         reply = ""
 
         for chunk in response:
@@ -165,9 +194,11 @@ class VexaBrain:
 
         print()
 
-        self.history.append({
-            "role": "assistant",
-            "content": reply,
-        })
+        self.history.append(
+            {
+                "role": "assistant",
+                "content": reply,
+            }
+        )
 
         return reply

@@ -10,30 +10,36 @@ class WebSearchTool:
     name = "web_search"
     description = "Searches the web for information."
 
-    def __init__(self):
+    def __init__(self, kill_switch):
         self.privacy = PrivacyCore()
         self.activity_log = ActivityLog()
         self.permission = PermissionManager()
         self.confirmation = ConfirmationManager()
+        self.kill_switch = kill_switch
 
     def run(self, query):
-        # 1. Check privacy first
+        #1. for kill switch check, if active, block the web search
+        if self.kill_switch.is_active():
+            self.activity_log.record("WEB_SEARCH", "BLOCKED")
+            return "External access is disabled by the kill switch."
+        
+        # 2. Check privacy first
         if not self.privacy.check_external_data(query):
             self.activity_log.record("WEB_SEARCH", "BLOCKED")
             return "I cannot search for that."
 
-        # 2. Ask for internet permission if not already granted
+        # 3. Ask for internet permission if not already granted
         if not self.permission.is_allowed():
             if not self.permission.request_external_access():
                 self.activity_log.record("WEB_SEARCH", "BLOCKED")
                 return "Internet access is not permitted."
 
-        # 3. Ask for explicit confirmation
+        # 4. Ask for explicit confirmation
         if not self.confirmation.request_confirmation("WEB_SEARCH"):
             self.activity_log.record("WEB_SEARCH", "BLOCKED")
             return "Web search cancelled."
 
-        # 4. Log the approved action
+        # 5. Log the approved action
         self.activity_log.record("WEB_SEARCH", "ALLOWED")
 
         try:

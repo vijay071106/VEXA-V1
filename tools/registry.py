@@ -4,14 +4,14 @@ from tools.web_search import WebSearchTool
 
 
 class ToolRegistry:
-    def __init__(self):
+    def __init__(self, kill_switch):
         self.tools = {
             "calculator": {
                 "tool": CalculatorTool(),
                 "risk": "safe",
             },
             "web_search": {
-                "tool": WebSearchTool(),
+                "tool": WebSearchTool(kill_switch),
                 "risk": "safe",
             },
         }
@@ -37,9 +37,13 @@ class ToolRegistry:
 
     def execute(self, name, argument):
         allowed, message = SafetyLayer.check(name)
+
         if not allowed:
             return message
+
         tool = self.get_tool(name)
+
         if tool is None:
             return f"Tool '{name}' is not available."
+
         return tool.run(argument)
