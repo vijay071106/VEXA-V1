@@ -3,6 +3,7 @@ import ollama
 from config.settings import settings
 from tools.registry import ToolRegistry
 from core.privacy import PrivacyCore
+from core.router import ToolRouter
 
 
 class VexaBrain:
@@ -18,6 +19,9 @@ class VexaBrain:
         self.tool_registry = ToolRegistry(self.kill_switch)
 
         self.privacy = PrivacyCore()
+
+        # Central tool router
+        self.router = ToolRouter()
 
     def use_tool(self, name, argument):
         return self.tool_registry.execute(name, argument)
@@ -127,8 +131,15 @@ class VexaBrain:
         if message.lower().strip() == "privacy status":
             return str(self.privacy.status())
 
-        # Check for simple arithmetic expressions first
-        if self.is_calculation(message):
+        # Let the router decide the execution path
+        route = self.router.route(
+            message,
+            self.is_calculation,
+            self.is_web_search,
+        )
+
+        # Calculator route
+        if route == "calculator":
             expression = (
                 message.lower()
                 .replace("what is", "")
@@ -137,15 +148,13 @@ class VexaBrain:
                 .strip()
             )
 
-            result = self.use_tool(
+            return self.use_tool(
                 "calculator",
                 expression,
             )
 
-            return result
-
-        # Check for web search requests
-        if self.is_web_search(message):
+        # Web search route
+        if route == "web_search":
             query = (
                 message.lower()
                 .replace("search for", "")
