@@ -8,11 +8,11 @@ class ToolRegistry:
         self.tools = {
             "calculator": {
                 "tool": CalculatorTool(),
-                "risk": "safe",
+                "risk": "low",
             },
             "web_search": {
                 "tool": WebSearchTool(kill_switch),
-                "risk": "safe",
+                "risk": "medium",
             },
         }
 
