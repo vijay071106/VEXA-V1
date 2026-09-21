@@ -36,7 +36,10 @@ class ToolRegistry:
         return entry["risk"]
 
     def execute(self, name, argument):
-        allowed, message = SafetyLayer.check(name)
+        allowed, message = SafetyLayer.check(
+            name,
+            argument,
+        )
 
         if not allowed:
             return message
