@@ -20,20 +20,29 @@ class ActivityLog:
 
     def record(self, action, status):
         allowed_statuses = {"ALLOWED", "BLOCKED"}
+
         if status not in allowed_statuses:
             status = "BLOCKED"
-            event = {
-                "time": datetime.now().isoformat(timespec="seconds"),
-                "action": action,
-                "status": status,
-            }
+
+        event = {
+            "time": datetime.now().isoformat(timespec="seconds"),
+            "action": action,
+            "status": status,
+        }
+
+        self.events.append(event)
+
+        self.file_path.write_text(
+            json.dumps(self.events, indent=2),
+            encoding="utf-8",
+        )
 
     def recent(self, limit=10):
         return self.events[-limit:]
-    
+
     def display_recent(self, limit=10):
         for event in self.recent(limit):
             print(
                 f"[{event['time']}] "
-                f"{event['action']} → {event['status']}"
+                f"{event['action']} -> {event['status']}"
             )
